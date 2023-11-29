@@ -1,0 +1,7 @@
+#ifndef _VARIABLES
+#define _VARIABLES
+
+#define APP_VERSION_MAJOR @BeastFirstServer_VERSION_MAJOR@
+#define APP_VERSION_MINOR @BeastFirstServer_VERSION_MINOR@
+
+#endif

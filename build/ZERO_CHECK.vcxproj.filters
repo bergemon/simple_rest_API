@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="D:\CPP\CMake Projects\BeastFirstServer\build\CMakeFiles\148fea3f678b85a21aa0097c3e712fa6\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="D:\CPP\CMake Projects\BeastFirstServer\variables.hpp.in">
+      <Filter>Buildsystem Input Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{73F0210E-2F24-3205-8477-2629A36E9457}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{3CAADF0A-2D8F-3640-AE69-74458F8A6472}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Buildsystem Input Files">
+      <UniqueIdentifier>{ABA3B68B-9FC1-387F-ABEA-93F703DB5583}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
