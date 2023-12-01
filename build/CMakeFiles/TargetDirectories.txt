@@ -1,3 +1,0 @@
-D:/CPP/CMake Projects/BeastFirstServer/build/CMakeFiles/server.dir
-D:/CPP/CMake Projects/BeastFirstServer/build/CMakeFiles/ALL_BUILD.dir
-D:/CPP/CMake Projects/BeastFirstServer/build/CMakeFiles/ZERO_CHECK.dir
