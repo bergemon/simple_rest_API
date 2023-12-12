@@ -7,7 +7,7 @@ namespace RouteCheckers {
         bool hasQuery;
     };
 
-    constexpr Target targets[] = {
+    const Target targets[] = {
         { "users", true },
         { "auth", false }
     };
