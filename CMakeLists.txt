@@ -18,6 +18,8 @@ set(
 
     # Handle HTTP session requests
     src/sharedFunctions.cxx
+    src/createResponse.cxx
+    src/HTTP/handleRequest.cxx
 
     # Authentication
     src/auth/auth.cxx
@@ -39,12 +41,14 @@ set (
     include/timer/timer.hpp
 
     # HTTP listener & sessions
-    include/server.hpp
-    include/session.hpp
+    include/HTTP/server.hpp
+    include/HTTP/session.hpp
 
     # Handle HTTP session requests
-    include/handleRequest.hpp
+    include/HTTP/handleRequest.hpp
+    include/HTTP/createResponse.hpp
     include/sharedFunctions.hpp
+    include/responseInfo.hpp
 
     # Websocket
     include/webSocket/webSocketListener.hpp
@@ -57,7 +61,7 @@ set (
     include/getData/getData.hpp
 
     # Check routes
-    include/checkRoutes.hpp
+    include/checkRoutes/checkTargets.hpp
 )
 
 set(
@@ -122,8 +126,8 @@ if(WIN32)
 endif(WIN32)
 
 configure_file(
-    variables.hpp.in
-    variables.hpp
+    include/variables.hpp.in
+    include/variables.hpp
 )
 
 target_include_directories(

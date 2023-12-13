@@ -1,6 +1,4 @@
 #pragma once
-#include "dependencies.hpp"
-#include "sharedFunctions.hpp"
 #include "session.hpp"
 
 namespace Server {

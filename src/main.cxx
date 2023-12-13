@@ -1,9 +1,9 @@
 ﻿#include "../include/dependencies.hpp"
 #include "../include/timer/timer.hpp"
 #include "../include/WebSocket/webSocketListener.hpp"
-#include "../include/server.hpp"
+#include "../include/HTTP/server.hpp"
 #include "../include/WebSocket/webSocketListener.hpp"
-#include "../variables.hpp"
+#include "include/variables.hpp"
 
 #define _DEBUG
 

@@ -1,6 +1,6 @@
 #pragma once
-#include "dependencies.hpp"
-#include "sharedFunctions.hpp"
+#include "../dependencies.hpp"
+#include "../sharedFunctions.hpp"
 #include "handleRequest.hpp"
 
 namespace Session {

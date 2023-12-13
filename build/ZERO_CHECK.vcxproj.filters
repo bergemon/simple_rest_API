@@ -6,8 +6,8 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <None Include="D:\CPP\CMake Projects\BeastFirstServer\variables.hpp.in">
-      <Filter>Buildsystem Input Files</Filter>
+    <None Include="D:\CPP\CMake Projects\BeastFirstServer\include\variables.hpp.in">
+      <Filter>Buildsystem Input Files\include</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -17,8 +17,8 @@
     <Filter Include="Header Files">
       <UniqueIdentifier>{3CAADF0A-2D8F-3640-AE69-74458F8A6472}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Buildsystem Input Files">
-      <UniqueIdentifier>{ABA3B68B-9FC1-387F-ABEA-93F703DB5583}</UniqueIdentifier>
+    <Filter Include="Buildsystem Input Files\include">
+      <UniqueIdentifier>{05820903-A7E3-3001-AA07-366DA93DDC00}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

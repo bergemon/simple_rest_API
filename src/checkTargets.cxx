@@ -1,31 +1,45 @@
-#include "../include/checkRoutes.hpp"
-#include "../include/getData/getData.hpp"
-#include "../include/handleRequest.hpp"
+#include "../include/checkRoutes/checkTargets.hpp"
 
 // Route pre-check
-HandleRequest::resInfo HandleRequest::routePreCheck(std::string target, http::verb method) {
+ResponseInfo::resInfo RouteCheckers::routePreCheck(const std::string target,
+    const http::verb method)
+{
+    using namespace ResponseInfo;
+    // Getting target position
+    int32_t targetPos = RouteCheckers::requestTargetPos(target);
+
     // Make sure we can handle the method
-    if (method != http::verb::get && method != http::verb::head)
-        return { HandleRequest::responseStatus::STATUS_BAD_REQUEST,
+    if (method != http::verb::get && method != http::verb::head && method != http::verb::post)
+        return { STATUS_BAD_REQUEST,
             "Unknown HTTP-method" };
 
+    // The requested target must handle the specified method
+    if (targetPos == 1 && method != http::verb::post)
+        return { STATUS_METHOD_NOT_ALLOWED, "Wrong method"};
+
     // Requested target must exist
-    int targetPos = RouteCheckers::requestTargetPos(target);
     if (targetPos == -1)
-        return { HandleRequest::responseStatus::STATUS_NOT_FOUND,
-            target };
+        return { STATUS_NOT_FOUND, target };
 
     // Request target must be absolute and not contain "..".
     if (!RouteCheckers::isRequestTargetOk(target))
-        return { HandleRequest::responseStatus::STATUS_BAD_REQUEST,
+        return { STATUS_BAD_REQUEST,
             "Illegal request-target" };
 
-    // If target request have no query parameters            
-    if (!RouteCheckers::hasQueryParams(targetPos))
-        return { HandleRequest::responseStatus::STATUS_BAD_REQUEST,
+    // If there are query string but target does not have it
+    std::string query = boost::url_view(target).query();
+    if (query.size() > 0
+        && !RouteCheckers::hasQueryParams(targetPos))
+        return { STATUS_BAD_REQUEST,
             "There are no query parameters in this target" };
 
-    return { HandleRequest::responseStatus::STATUS_OK, "" };
+    // Wrong query params
+    if (query.size() > 0
+        && !RouteCheckers::hasSuchQueryParams(targetPos, query))
+        return { STATUS_BAD_REQUEST,
+            "Passed wrong query parameters: '" + query + "'" };
+
+    return { STATUS_OK, "" };
 }
 
 // RouteCheckers
@@ -37,6 +51,7 @@ bool RouteCheckers::isRequestTargetOk(const std::string target) {
 
     return true;
 }
+
 // Request target must be absolute and not contain "..".
 int RouteCheckers::requestTargetPos(const std::string target) {
     int pos = 0;
@@ -49,6 +64,7 @@ int RouteCheckers::requestTargetPos(const std::string target) {
 
     return -1;
 }
+
 // If target request have no query parameters
 bool RouteCheckers::hasQueryParams(const int pos) {
     if (RouteCheckers::targets[pos].hasQuery)
@@ -56,10 +72,29 @@ bool RouteCheckers::hasQueryParams(const int pos) {
             
     return false;
 }
-std::string RouteCheckers::GetRequestedData(const int pos, const std::string query) {
+
+// Check query string
+bool RouteCheckers::hasSuchQueryParams(const int pos, const std::string query) {
+    for (const auto& elem : RouteCheckers::targets[pos].m_queryParams) {
+        if (query.find(elem) != std::string::npos)
+            return true;
+    }
+    return false;
+}
+
+// Get requested data
+ResponseInfo::dataInfo RouteCheckers::GetRequestedData
+    (const int pos, const std::string body, const std::string query, const std::string cookie)
+{
+    using namespace ResponseInfo;
+
     // users
     if (pos == 0)
-        return DataBase::getUsers(query);
+        return { responseStatus::STATUS_OK, DataBase::getUsers(query, cookie) };
 
-    return "Bad request";
+    // auth
+    if (pos == 1)
+        return Authentication::validateUser(body);
+
+    return { responseStatus::STATUS_NOT_FOUND, "Bad request" };
 }

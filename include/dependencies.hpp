@@ -8,6 +8,7 @@
 #include <boost/beast.hpp>
 #include <boost/config.hpp>
 #include <boost/url.hpp>
+#include <boost/optional.hpp>
 #include <nlohmann/json.hpp>
 #include <pqxx/pqxx>
 #include <jwt-cpp/jwt.h>

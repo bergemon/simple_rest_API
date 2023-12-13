@@ -1,0 +1,15 @@
+.mainDiv {
+    margin-top: 200px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.mainDiv input {
+    height: 40px;
+    width: 200px;
+}
+
+.mainDiv button {
+    width: 150px;
+}

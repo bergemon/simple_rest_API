@@ -10,6 +10,12 @@
     <ClCompile Include="D:\CPP\CMake Projects\BeastFirstServer\src\sharedFunctions.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="D:\CPP\CMake Projects\BeastFirstServer\src\createResponse.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\CPP\CMake Projects\BeastFirstServer\src\HTTP\handleRequest.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="D:\CPP\CMake Projects\BeastFirstServer\src\auth\auth.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -27,16 +33,22 @@
     <ClInclude Include="D:\CPP\CMake Projects\BeastFirstServer\include\timer\timer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="D:\CPP\CMake Projects\BeastFirstServer\include\server.hpp">
+    <ClInclude Include="D:\CPP\CMake Projects\BeastFirstServer\include\HTTP\server.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="D:\CPP\CMake Projects\BeastFirstServer\include\session.hpp">
+    <ClInclude Include="D:\CPP\CMake Projects\BeastFirstServer\include\HTTP\session.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="D:\CPP\CMake Projects\BeastFirstServer\include\handleRequest.hpp">
+    <ClInclude Include="D:\CPP\CMake Projects\BeastFirstServer\include\HTTP\handleRequest.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\CPP\CMake Projects\BeastFirstServer\include\HTTP\createResponse.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="D:\CPP\CMake Projects\BeastFirstServer\include\sharedFunctions.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\CPP\CMake Projects\BeastFirstServer\include\responseInfo.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="D:\CPP\CMake Projects\BeastFirstServer\include\webSocket\webSocketListener.hpp">
@@ -51,7 +63,7 @@
     <ClInclude Include="D:\CPP\CMake Projects\BeastFirstServer\include\getData\getData.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="D:\CPP\CMake Projects\BeastFirstServer\include\checkRoutes.hpp">
+    <ClInclude Include="D:\CPP\CMake Projects\BeastFirstServer\include\checkRoutes\checkTargets.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

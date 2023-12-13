@@ -1,5 +1,4 @@
 *.txt
 /x64
-/.vscode
 /.git
 /build

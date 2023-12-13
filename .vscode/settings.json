@@ -114,7 +114,7 @@
     "cmake.configureSettings": {
         "Boost_DEBUG": "OFF",
         "Boost_USE_STATIC_LIBS": "ON",
-        "Boost_INCLUDE_DIR": "C:/boost_1_82_0",
+        "Boost_INCLUDE_DIR": "D:/SDKs/boost_1_82_0",
         "OPENSSL_INCLUDE_DIR": "D:/OpenSSL/Static/x64/Release/include",
         "nlohmann_json_DIR": "D:/SDKs/json-develop/build",
         "--config": "Release"

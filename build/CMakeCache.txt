@@ -33,19 +33,19 @@ Boost_DEBUG:STRING=OFF
 Boost_DIR:PATH=Boost_DIR-NOTFOUND
 
 //No help, variable specified on the command line.
-Boost_INCLUDE_DIR:STRING=C:/boost_1_82_0
+Boost_INCLUDE_DIR:STRING=D:/SDKs/boost_1_82_0
 
 //Boost library directory DEBUG
-Boost_LIBRARY_DIR_DEBUG:PATH=C:/boost_1_82_0/stage/lib
+Boost_LIBRARY_DIR_DEBUG:PATH=D:/SDKs/boost_1_82_0/stage/lib
 
 //Boost library directory RELEASE
-Boost_LIBRARY_DIR_RELEASE:PATH=C:/boost_1_82_0/stage/lib
+Boost_LIBRARY_DIR_RELEASE:PATH=D:/SDKs/boost_1_82_0/stage/lib
 
 //Boost url library (debug)
-Boost_URL_LIBRARY_DEBUG:FILEPATH=C:/boost_1_82_0/stage/lib/libboost_url-vc143-mt-gd-x64-1_82.lib
+Boost_URL_LIBRARY_DEBUG:FILEPATH=D:/SDKs/boost_1_82_0/stage/lib/libboost_url-vc143-mt-gd-x64-1_82.lib
 
 //Boost url library (release)
-Boost_URL_LIBRARY_RELEASE:FILEPATH=C:/boost_1_82_0/stage/lib/libboost_url-vc143-mt-x64-1_82.lib
+Boost_URL_LIBRARY_RELEASE:FILEPATH=D:/SDKs/boost_1_82_0/stage/lib/libboost_url-vc143-mt-x64-1_82.lib
 
 //No help, variable specified on the command line.
 Boost_USE_STATIC_LIBS:STRING=ON
@@ -404,7 +404,7 @@ CMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_VERBOSE_MAKEFILE
 CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
 //Details about finding Boost
-FIND_PACKAGE_MESSAGE_DETAILS_Boost:INTERNAL=[C:/boost_1_82_0][cfound components: url ][v1.82.0(1.82)]
+FIND_PACKAGE_MESSAGE_DETAILS_Boost:INTERNAL=[D:/SDKs/boost_1_82_0][cfound components: url ][v1.82.0(1.82)]
 //Details about finding OpenSSL
 FIND_PACKAGE_MESSAGE_DETAILS_OpenSSL:INTERNAL=[D:/OpenSSL/Static/x64/Release/lib/libcrypto.lib][D:/OpenSSL/Static/x64/Release/include][c ][v3.2.0()]
 //Details about finding PostgreSQL
@@ -428,11 +428,11 @@ SSL_EAY_LIBRARY_DEBUG-ADVANCED:INTERNAL=1
 //Components requested for this build tree.
 _Boost_COMPONENTS_SEARCHED:INTERNAL=url
 //Last used Boost_INCLUDE_DIR value.
-_Boost_INCLUDE_DIR_LAST:INTERNAL=C:/boost_1_82_0
+_Boost_INCLUDE_DIR_LAST:INTERNAL=D:/SDKs/boost_1_82_0
 //Last used Boost_LIBRARY_DIR_DEBUG value.
-_Boost_LIBRARY_DIR_DEBUG_LAST:INTERNAL=C:/boost_1_82_0/stage/lib
+_Boost_LIBRARY_DIR_DEBUG_LAST:INTERNAL=D:/SDKs/boost_1_82_0/stage/lib
 //Last used Boost_LIBRARY_DIR_RELEASE value.
-_Boost_LIBRARY_DIR_RELEASE_LAST:INTERNAL=C:/boost_1_82_0/stage/lib
+_Boost_LIBRARY_DIR_RELEASE_LAST:INTERNAL=D:/SDKs/boost_1_82_0/stage/lib
 //Last used Boost_NAMESPACE value.
 _Boost_NAMESPACE_LAST:INTERNAL=boost
 //Last used Boost_USE_MULTITHREADED value.
