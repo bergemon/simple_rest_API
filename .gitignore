@@ -1,4 +1,4 @@
 *.txt
 /x64
-/.git
 /build
+/.git
