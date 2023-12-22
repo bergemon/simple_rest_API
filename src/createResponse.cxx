@@ -38,7 +38,7 @@ http::message_generator CreateResponse::createResponse(const uint32_t version, c
         http::response<http::string_body> res{ http::status::ok, version };
         res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
         res.set(http::field::access_control_allow_origin, "*");
-        res.set(http::field::set_cookie, resTempData.m_data + "; Secure; HttpOnly");
+        res.set(http::field::set_cookie, "sToken=" + resTempData.m_data + "; path=/; secure; HttpOnly");
         res.body() = j.dump();
         res.content_length(j.dump().size());
         res.keep_alive(keep_alive);

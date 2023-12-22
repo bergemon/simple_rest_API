@@ -84,10 +84,17 @@ ResponseInfo::dataInfo Authentication::validateUser(const std::string body) {
 
 std::string Authentication::getToken(const std::string username, const std::string password) {
 
+	jwt::claim from_raw_json;
+	std::istringstream iss{R"({"roles":["user", "admin"]})"};
+	iss >> from_raw_json;
+
     auto token = jwt::create()
         .set_issuer(Authentication::issuer)
-        .set_type("JWS")
-        .set_payload_claim("sample", jwt::claim(std::string("test")))
+        .set_type("JWT")
+        .set_id("access_token")
+        .set_payload_claim("roles", from_raw_json)
+        .set_issued_at(std::chrono::system_clock::now())
+        .set_expires_at(std::chrono::system_clock::now() + std::chrono::seconds(3600))
         .sign(jwt::algorithm::hs256{ Authentication::secretKey });
 
     return token.c_str();
