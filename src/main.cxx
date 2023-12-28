@@ -1,8 +1,8 @@
 ﻿#include "../include/dependencies.hpp"
 #include "../include/timer/timer.hpp"
-#include "../include/WebSocket/webSocketListener.hpp"
 #include "../include/HTTP/server.hpp"
-#include "../include/WebSocket/webSocketListener.hpp"
+#include "../include/webSocket/webSocketListener.hpp"
+#include "../include/webSocket/webSocketListener.hpp"
 #include "include/variables.hpp"
 
 #define _DEBUG
@@ -24,15 +24,14 @@ int main(int argc, char** argv) {
         << std::endl;
 
     // Check command line arguments.
-    // if (argc < 2 && argc != 3) {
-    //     std::cerr << "Usage: [AppName] <port> <threads>\n" << "Example: [AppName] 80 1\n"
-    //         << "Passing number of threads is not necessary.\n"
-    //         << "If you don't pass number of threads, there will be only one."
-    //         << std::endl;
-    //     return EXIT_FAILURE;
-    // }
-    // auto const port = static_cast<unsigned short>(std::atoi(argv[1]));
-    unsigned short port = 80;
+    if (argc < 2 && argc != 3) {
+        std::cerr << "Usage: [AppName] <port> <threads>\n" << "Example: [AppName] 80 1\n"
+            << "Passing number of threads is not necessary.\n"
+            << "If you don't pass number of threads, there will be only one."
+            << std::endl;
+        return EXIT_FAILURE;
+    }
+    auto const port = static_cast<unsigned short>(std::atoi(argv[1]));
     int threads = 1;
     if (argc > 2)
         threads = std::max<int>(1, std::atoi(argv[2]));

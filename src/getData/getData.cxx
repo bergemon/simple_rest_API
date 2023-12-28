@@ -16,17 +16,18 @@ std::string DataBase::getUsers(const std::string query, const std::string cookie
                     return j.dump();
                 }
                 else
-                    throw std::exception("unauthorized");
+                    throw std::invalid_argument("unauthorized");
+
 
             int min = std::atoi(query.substr(query.find("min") + 4,
                 query.find("&") - query.find("=")).c_str());
             int max = std::atoi(query.substr(query.find("max") + 4,
                 query.length() - query.rfind("=")).c_str());
 
-            res = worker.exec("SELECT * FROM users WHERE id >=" + std::to_string(min) + " AND id <=" + std::to_string(max));
+            res = worker.exec("SELECT id, username, password FROM users WHERE id >=" + std::to_string(min) + " AND id <=" + std::to_string(max));
         }
         else
-            res = worker.exec("SELECT * FROM users");
+            res = worker.exec("SELECT id, email, username, date_of_sign_up, phone FROM users");
 
         nlohmann::ordered_json j = nlohmann::json::array();
 

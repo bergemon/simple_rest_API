@@ -2,21 +2,44 @@
 #include <fstream>
 
 namespace Authentication {
-    static constexpr char secretKey[] = "AFGkdjfoir897438543fdhnsgfdgfd";
+    static constexpr char secretKeySession[] = "gfjdioghjdfghdfjgnsdOGJNSDFOGNOSRJghnosgnhosdjgnodjgosrijg90r4"
+    "8t83548auGHUARIHgurshgozfhxbuidfzhbuifdhguiozsrhnhuobdtubrhsjz0gihrozughdughduzighdtuhzogushdrjgiu5"
+    "e90yzujt94w7t8(IHuISHsuivhS89yg7rsghoURSJviosRHigurhsOUVRsgiUHSRUIGBEshuoghOSUGhfuoHSOGUrYIShorugh";
+
+    static constexpr char secretKeyRefresh[] = "gfdgfdgfdgfdrjijoriptuorituwrioptkrwopfkmwfmekldsmeopkfropeut83"
+    "dsjfdusoivhds7vytsuhfeosfkedsiofjdisufhdygfyeadjfieusuagfaxgcasczxcvxpjuiuiyvpdpfosifsfjrsghisrhfyfrsgrsgs"
+    "GFKdgnjdfhgdfuighfd9uu8ty573489hgIZUJHGFDgvuofghdfioghsruiyg79drszghesdipfleshtdkohfopiju[klfjdsjfdios4345";
+
     static constexpr char issuer[] = "bergemon_REST_API";
 }
 
-bool Authentication::authUser(const std::string token) {
-    const auto decoded = jwt::decode(token);
-    
-    const auto verifier = jwt::verify()
-        .allow_algorithm(jwt::algorithm::hs256{ Authentication::secretKey })
-        .with_issuer(Authentication::issuer);
-
+bool Authentication::authUser(const std::string cookie) {
     try {
+        const std::string token = cookie.substr(cookie.find("stk_=") + 5,
+            cookie.find(";") > cookie.find("stk_=") + 5
+            ? cookie.find(";")
+            : cookie.length() - (cookie.find("stk_=") + 5));
+        const auto decoded = jwt::decode(token);
+
+        for (const auto& elem : decoded.get_payload_json()) {
+            std::cout << elem.first << ": " << elem.second.to_str() << std::endl;
+        }
+
+        const auto verifier = jwt::verify()
+            .allow_algorithm(jwt::algorithm::hs256{ Authentication::secretKeySession })
+            .with_issuer(Authentication::issuer);
+
         verifier.verify(decoded);
     }
-    catch(const std::exception& e) {
+    catch(std::runtime_error& e) {
+        std::cout << e.what() << std::endl;
+        return false;
+    }
+    catch(std::invalid_argument& e) {
+        std::cout << e.what() << std::endl;;
+        return false;
+    }
+    catch(...) {
         return false;
     }
 
@@ -26,7 +49,8 @@ bool Authentication::authUser(const std::string token) {
 ResponseInfo::dataInfo Authentication::validateUser(const std::string body) {
     using namespace ResponseInfo;
 
-    /* {
+    /*  JSON structure for this route:
+    {
         Authorization: {
             username: *,
             password: *
@@ -49,7 +73,7 @@ ResponseInfo::dataInfo Authentication::validateUser(const std::string body) {
                 if (key == "Authorization" && data[key].is_object()) {
                     for (auto& [key, value] : data[key].items()) {
                         if (key != "username" && key != "password")
-                            throw std::exception("Wrong JSON structure");
+                            throw std::invalid_argument("Wrong JSON structure");
                         if (key == "username")
                             usrname = value.dump().substr(1, value.dump().size() - 2);
                         else if (key == "password")
@@ -57,7 +81,7 @@ ResponseInfo::dataInfo Authentication::validateUser(const std::string body) {
                     }
                 }
                 if (itemsCount > 1)
-                    throw std::exception("Wrong JSON structure");
+                    throw std::invalid_argument("Wrong JSON structure");
             }
 
             pqxx::row r = worker.exec1("SELECT username, password FROM users WHERE username LIKE '" + usrname + "'");
@@ -84,18 +108,29 @@ ResponseInfo::dataInfo Authentication::validateUser(const std::string body) {
 
 std::string Authentication::getToken(const std::string username, const std::string password) {
 
-	jwt::claim from_raw_json;
-	std::istringstream iss{R"({"roles":["user", "admin"]})"};
-	iss >> from_raw_json;
+	jwt::claim from_raw_json(
+        std::string(
+            R"###({"username":")###" + username + R"###(","roles":["user", "admin"]})###"
+        )
+    );
 
-    auto token = jwt::create()
+    auto sToken = jwt::create()
         .set_issuer(Authentication::issuer)
         .set_type("JWT")
         .set_id("access_token")
-        .set_payload_claim("roles", from_raw_json)
+        .set_payload_claim("username", from_raw_json)
         .set_issued_at(std::chrono::system_clock::now())
-        .set_expires_at(std::chrono::system_clock::now() + std::chrono::seconds(3600))
-        .sign(jwt::algorithm::hs256{ Authentication::secretKey });
+        .set_expires_at(std::chrono::system_clock::now() + std::chrono::minutes(10))
+        .sign(jwt::algorithm::hs256{ Authentication::secretKeySession });
 
-    return token.c_str();
+    auto rToken = jwt::create()
+        .set_issuer(Authentication::issuer)
+        .set_type("JWT")
+        .set_id("refresh_token")
+        .set_payload_claim("username", from_raw_json)
+        .set_issued_at(std::chrono::system_clock::now())
+        .set_expires_at(std::chrono::system_clock::now() + std::chrono::months(3))
+        .sign(jwt::algorithm::hs256{ Authentication::secretKeyRefresh });
+
+    return std::string("stk_=" + sToken.c_str() + ";rtk_=" + rToken.c_str());
 }
