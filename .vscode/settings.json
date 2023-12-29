@@ -1,5 +1,6 @@
 {
     "cmake.configureSettings": {
+        // Windows
         "Boost_DEBUG": false,
         "Boost_USE_STATIC_LIBS": true,
         "BOOST_LIBRARYDIR": "D:/SDKs/boost_1_82_0/bin.v2/libs",
