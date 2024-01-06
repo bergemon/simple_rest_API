@@ -8,7 +8,7 @@ std::string DataBase::getUsers(const std::string query, const std::string cookie
 
         if (query.size() > 0) {
             if (query.find("getUserPass") != std::string::npos)
-                if (Authentication::authUser(cookie)) {
+                if (Authentication::authUser(cookie).hasTokens) {
                     std::string username = query.substr(query.find("=") + 1, query.size() - (query.find("=") + 1));
                     pqxx::row r = worker.exec1("SELECT password FROM users WHERE username LIKE '" + username + "'");
                     nlohmann::ordered_json j = nlohmann::json::object();

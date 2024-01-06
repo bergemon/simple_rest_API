@@ -4,7 +4,7 @@
 namespace Authentication {
     ResponseInfo::dataInfo validateUser(const std::string body);
 
-    bool authUser(const std::string token);
+    ResponseInfo::tokensInfo authUser(const std::string cookies);
     
-    std::string getToken(const std::string username, const std::string password);
+    ResponseInfo::tokensInfo getToken(const std::string username);
 }

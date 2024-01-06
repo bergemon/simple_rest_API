@@ -10,8 +10,7 @@ ResponseInfo::resInfo RouteCheckers::routePreCheck(const std::string target,
 
     // Make sure we can handle the method
     if (method != http::verb::get && method != http::verb::head && method != http::verb::post)
-        return { STATUS_BAD_REQUEST,
-            "Unknown HTTP-method" };
+        return { STATUS_BAD_REQUEST, "Unknown HTTP-method" };
 
     // The requested target must handle the specified method
     if (targetPos == 1 && method != http::verb::post)

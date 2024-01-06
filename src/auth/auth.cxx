@@ -1,5 +1,4 @@
 #include "../../include/auth/auth.hpp"
-#include <fstream>
 
 namespace Authentication {
     static constexpr char secretKeySession[] = "gfjdioghjdfghdfjgnsdOGJNSDFOGNOSRJghnosgnhosdjgnodjgosrijg90r4"
@@ -13,37 +12,95 @@ namespace Authentication {
     static constexpr char issuer[] = "bergemon_REST_API";
 }
 
-bool Authentication::authUser(const std::string cookie) {
-    try {
-        const std::string token = cookie.substr(cookie.find("stk_=") + 5,
-            cookie.find(";") > cookie.find("stk_=") + 5
-            ? cookie.find(";")
-            : cookie.length() - (cookie.find("stk_=") + 5));
-        const auto decoded = jwt::decode(token);
+ResponseInfo::tokensInfo Authentication::authUser(const std::string cookie) {
 
-        for (const auto& elem : decoded.get_payload_json()) {
-            std::cout << elem.first << ": " << elem.second.to_str() << std::endl;
+    const std::string stk = cookie.substr(cookie.find("stk_=") + 5,
+        cookie.find(";") > cookie.find("stk_=") + 5
+        ? cookie.find(";") - 5 : cookie.length() - (cookie.find("stk_=") + 5)
+    );
+
+    const std::string rtk = cookie.substr(cookie.find("rtk_=") + 5,
+        cookie.find(";") > cookie.find("rtk_=") + 5
+        ? cookie.find(";") - 5 : cookie.length() - (cookie.find("rtk_=") + 5)
+    );
+
+    std::time_t tt;
+    std::stringstream ss;
+    std::string stk_utc, rtk_utc;
+    
+    if (stk.length() > 0)
+    {
+        try {
+            const auto stk_decoded = jwt::decode(stk);
+            for (const auto& elem : stk_decoded.get_payload_json()) {
+                // DEBUG
+                std::cout << elem.first << ": " << elem.second.to_str() << std::endl;
+                // DEBUG
+                if (elem.first == "exp") {
+                    tt = std::atoi(elem.second.to_str().c_str());
+                    ss << std::put_time(std::gmtime(&tt), "%a %b %d %H:%M:%S %Y");
+                    stk_utc = ss.str();
+
+                    if (std::atoi(elem.second.to_str().c_str()) < std::chrono::system_clock::now().time_since_epoch() / std::chrono::seconds(1)) {
+                        return {};
+                    }
+                }
+            }
+
+            // Verify session token
+            const auto stk_verifier = jwt::verify()
+                .allow_algorithm(jwt::algorithm::hs256{ Authentication::secretKeySession })
+                .with_issuer(Authentication::issuer);
+            stk_verifier.verify(stk_decoded);
+
+            // Refresh token
+            const auto rtk_decoded = jwt::decode(rtk);
+            for (const auto& elem : rtk_decoded.get_payload_json()) {
+                if (elem.first == "exp") {
+                    tt = std::atoi(elem.second.to_str().c_str());
+                    ss.str("");
+                    ss << std::put_time(std::gmtime(&tt), "%a %b %d %H:%M:%S %Y");
+                    rtk_utc = ss.str();
+
+                    if (std::atoi(elem.second.to_str().c_str()) < std::chrono::system_clock::now().time_since_epoch() / std::chrono::seconds(1)) {
+                        return {};
+                    }
+                }
+            }
+            // Verify refresh token
+            const auto rtk_verifier = jwt::verify()
+                .allow_algorithm(jwt::algorithm::hs256{ Authentication::secretKeyRefresh })
+                .with_issuer(Authentication::issuer);
+
+            rtk_verifier.verify(rtk_decoded);
         }
+        catch(...) { return {}; }
 
-        const auto verifier = jwt::verify()
-            .allow_algorithm(jwt::algorithm::hs256{ Authentication::secretKeySession })
-            .with_issuer(Authentication::issuer);
+        return {stk, stk_utc, rtk, rtk_utc};
+    }
+    else if (rtk.length() > 0) {
+        try {
+            const auto rtk_decoded = jwt::decode(rtk);
+            for (const auto& elem : rtk_decoded.get_payload_json()) {
+                if (elem.first == "exp") {
+                    if (std::atoi(elem.second.to_str().c_str()) < std::chrono::system_clock::now().time_since_epoch() / std::chrono::seconds(1)) {
+                        return {};
+                    }
+                }
+            }
+            // Verify refresh token
+            const auto verifier = jwt::verify()
+                .allow_algorithm(jwt::algorithm::hs256{ Authentication::secretKeyRefresh })
+                .with_issuer(Authentication::issuer);
 
-        verifier.verify(decoded);
-    }
-    catch(std::runtime_error& e) {
-        std::cout << e.what() << std::endl;
-        return false;
-    }
-    catch(std::invalid_argument& e) {
-        std::cout << e.what() << std::endl;;
-        return false;
-    }
-    catch(...) {
-        return false;
+            verifier.verify(rtk_decoded);
+        }
+        catch(...) { return {}; }
+
+        return {};
     }
 
-    return true;
+    return {};
 }
 
 ResponseInfo::dataInfo Authentication::validateUser(const std::string body) {
@@ -86,7 +143,9 @@ ResponseInfo::dataInfo Authentication::validateUser(const std::string body) {
 
             pqxx::row r = worker.exec1("SELECT username, password FROM users WHERE username LIKE '" + usrname + "'");
             if (usrpass == r.at(1).c_str()) {
-                return { STATUS_OK, getToken(usrname, usrpass), ".json", true };
+                nlohmann::ordered_json j = nlohmann::json::object();
+                j.push_back({ "authorization", "success" });
+                return { STATUS_OK, j.dump(), getToken(usrname), "", true };
             }
             else
                 return { STATUS_PERMISSION_DENIED, "Wrong password, try again" };
@@ -106,7 +165,7 @@ ResponseInfo::dataInfo Authentication::validateUser(const std::string body) {
     return { STATUS_PERMISSION_DENIED, "Wrong JSON structure" };
 }
 
-std::string Authentication::getToken(const std::string username, const std::string password) {
+ResponseInfo::tokensInfo Authentication::getToken(const std::string username) {
 
 	jwt::claim from_raw_json(
         std::string(
@@ -114,23 +173,39 @@ std::string Authentication::getToken(const std::string username, const std::stri
         )
     );
 
-    auto sToken = jwt::create()
+    std::chrono::time_point stp = std::chrono::system_clock::now() + std::chrono::minutes(10);
+    std::chrono::time_point rtp = std::chrono::system_clock::now() + std::chrono::days(90);
+    std::time_t tt;
+    std::stringstream ss;
+
+    // Session token UTC time
+    tt = std::chrono::system_clock::to_time_t(stp);
+    ss << std::put_time(std::gmtime(&tt), "%a %b %d %H:%M:%S %Y");
+    std::string stk_utc = ss.str();
+    ss.str("");
+
+    // Refresh token UTC time
+    tt = std::chrono::system_clock::to_time_t(rtp);
+    ss << std::put_time(std::gmtime(&tt), "%a %b %d %H:%M:%S %Y");
+    std::string rtk_utc = ss.str();
+
+    const std::string sToken = jwt::create()
         .set_issuer(Authentication::issuer)
         .set_type("JWT")
         .set_id("access_token")
         .set_payload_claim("username", from_raw_json)
         .set_issued_at(std::chrono::system_clock::now())
-        .set_expires_at(std::chrono::system_clock::now() + std::chrono::minutes(10))
+        .set_expires_at(stp)
         .sign(jwt::algorithm::hs256{ Authentication::secretKeySession });
 
-    auto rToken = jwt::create()
+    const std::string rToken = jwt::create()
         .set_issuer(Authentication::issuer)
         .set_type("JWT")
         .set_id("refresh_token")
         .set_payload_claim("username", from_raw_json)
         .set_issued_at(std::chrono::system_clock::now())
-        .set_expires_at(std::chrono::system_clock::now() + std::chrono::months(3))
+        .set_expires_at(rtp)
         .sign(jwt::algorithm::hs256{ Authentication::secretKeyRefresh });
 
-    return std::string("stk_=" + sToken.c_str() + ";rtk_=" + rToken.c_str());
+    return ResponseInfo::tokensInfo("stk_=" + sToken, stk_utc, "rtk_=" + rToken, rtk_utc);
 }

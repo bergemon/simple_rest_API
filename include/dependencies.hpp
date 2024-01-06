@@ -22,6 +22,7 @@
 #include <thread>
 #include <vector>
 #include <chrono>
+#include <ctime>
 #include <unordered_set>
 
 namespace beast = boost::beast;				// from <boost/beast.hpp>

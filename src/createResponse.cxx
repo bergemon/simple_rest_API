@@ -1,7 +1,7 @@
 #include "../include/HTTP/createResponse.hpp"
 
 http::message_generator CreateResponse::createResponse(const uint32_t version, const std::string target,
-    const bool keep_alive, const http::verb method, const std::string body, const std::string head) {
+    const bool keep_alive, const http::verb method, const std::string body, const std::string cookies) {
 
     // Getting request URI and query string
     boost::url_view url { target };
@@ -15,7 +15,7 @@ http::message_generator CreateResponse::createResponse(const uint32_t version, c
 
     using namespace ResponseInfo;
     int32_t targetPos = RouteCheckers::requestTargetPos(target);
-    dataInfo resTempData = RouteCheckers::GetRequestedData(targetPos, body, query, head);
+    dataInfo resTempData = RouteCheckers::GetRequestedData(targetPos, body, query, cookies);
 
     switch(resTempData.m_code) {
         case STATUS_NOT_FOUND:
@@ -30,28 +30,28 @@ http::message_generator CreateResponse::createResponse(const uint32_t version, c
     }
     auto const size = resBody.size();
 
-    // Auth route
-    if (method == http::verb::post && resTempData.m_auth) {
-        nlohmann::ordered_json j = nlohmann::json::object();
-        j.push_back({ "authorization", "success" });
-
-        http::response<http::string_body> res{ http::status::ok, version };
-        res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-        res.set(http::field::access_control_allow_origin, "*");
-        res.set(http::field::set_cookie, resTempData.m_data + "; path=/; secure; HttpOnly");
-        res.body() = j.dump();
-        res.content_length(j.dump().size());
-        res.keep_alive(keep_alive);
-        return res;
-    }
-
     // Respond to HEAD request
-    if (method == http::verb::head) {
+    if (method == http::verb::head)
+    {
         http::response<http::empty_body> res{ http::status::ok, version };
         res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
         res.set(http::field::content_type, mime_type(".json"));
         res.set(http::field::access_control_allow_origin, "*");
-        res.set(http::field::set_cookie, "Lalalalalaley; Secure; HttpOnly");
+        if (resTempData.tokens.hasTokens)
+        {
+            // Session token
+            res.set("Set-Cookie",
+                resTempData.tokens.sessionToken
+                + "; path=/; secure; httponly; expires="
+                + resTempData.tokens.stk_utc
+            );
+            // Refresh token
+            res.insert("Set-Cookie",
+                resTempData.tokens.refreshToken
+                + "; path=/; secure; httponly; expires="
+                + resTempData.tokens.rtk_utc
+            );
+        }
         res.content_length(size);
         res.keep_alive(keep_alive);
         return res;
@@ -63,7 +63,21 @@ http::message_generator CreateResponse::createResponse(const uint32_t version, c
     res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
     res.set(http::field::content_type, mime_type(".json"));
     res.set(http::field::access_control_allow_origin, "*");
-    res.set(http::field::set_cookie, "Lalalalalaley; Secure; HttpOnly");
+    if (resTempData.tokens.hasTokens)
+    {
+        // Session token
+        res.set("Set-Cookie",
+            resTempData.tokens.sessionToken
+            + "; path=/; secure; httponly; expires="
+            + resTempData.tokens.stk_utc
+        );
+        // Refresh token
+        res.insert("Set-Cookie",
+            resTempData.tokens.refreshToken
+            + "; path=/; secure; httponly; expires="
+            + resTempData.tokens.rtk_utc
+        );
+    }
     res.content_length(size);
     res.keep_alive(keep_alive);
     return res;
