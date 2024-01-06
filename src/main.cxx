@@ -15,8 +15,8 @@ int main(int argc, char** argv) {
 
     // Timer that can be used in some functions
     // Clock::Timer mainTimer;
-#endif _DEBUG
-#endif _WIN32
+#endif
+#endif
 
     std::cout << "Pet REST API by bergemon ver. "
         << APP_VERSION_MAJOR << '.' << APP_VERSION_MINOR << '\n'

@@ -19,28 +19,28 @@ namespace ResponseInfo {
             : m_code(code), m_why(why) {}
     };
 
+
     struct tokensInfo {
-        bool hasTokens = false;
+        const bool hasTokens = false;
 
-        std::string sessionToken;
-        std::string stk_utc;
+        const std::string sessionToken;
+        const std::string stk_utc;
 
-        std::string refreshToken;
-        std::string rtk_utc;
+        const std::string refreshToken;
+        const std::string rtk_utc;
 
         tokensInfo() {}
 
         tokensInfo(std::string stk, std::string stk_utc, std::string rtk, std::string rtk_utc)
             : hasTokens(true), sessionToken(stk), stk_utc(stk_utc), refreshToken(rtk), rtk_utc(rtk_utc)
         {}
-    
     };
 
     struct dataInfo {
-        responseStatus m_code;
-        std::string m_data;
-        std::string m_dataType;
-        tokensInfo tokens;
+        const responseStatus m_code;
+        const std::string m_data;
+        const std::string m_dataType;
+        const tokensInfo tokens;
 
         dataInfo(const responseStatus& code, const std::string& data, const std::string& dataType = ".json", bool auth = false)
             : m_code(code), m_data(data), m_dataType(dataType) {}

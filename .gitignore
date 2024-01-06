@@ -2,4 +2,4 @@
 /x64
 /build
 /.git
-/.vscode/c_cpp_properties.json
+c_cpp_properties.json

@@ -89,7 +89,7 @@ ResponseInfo::dataInfo RouteCheckers::GetRequestedData
 
     // users
     if (pos == 0)
-        return { responseStatus::STATUS_OK, DataBase::getUsers(query, cookie) };
+        return DataBase::getUsers(query, cookie);
 
     // auth
     if (pos == 1)

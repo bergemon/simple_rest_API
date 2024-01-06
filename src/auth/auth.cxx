@@ -14,46 +14,94 @@ namespace Authentication {
 
 ResponseInfo::tokensInfo Authentication::authUser(const std::string cookie) {
 
-    const std::string stk = cookie.substr(cookie.find("stk_=") + 5,
-        cookie.find(";") > cookie.find("stk_=") + 5
-        ? cookie.find(";") - 5 : cookie.length() - (cookie.find("stk_=") + 5)
-    );
+    std::string stk = "";
+    if (cookie.find("stk_=") != std::string::npos) {
+        stk = cookie.substr(cookie.find("stk_=") + 5,
+            cookie.find(";") > cookie.find("stk_=") + 5
+            ? cookie.find(";") - 5 : cookie.length() - (cookie.find("stk_=") + 5)
+        );
+    }
 
-    const std::string rtk = cookie.substr(cookie.find("rtk_=") + 5,
-        cookie.find(";") > cookie.find("rtk_=") + 5
-        ? cookie.find(";") - 5 : cookie.length() - (cookie.find("rtk_=") + 5)
-    );
+    std::string rtk = "";
+    if (cookie.find("rtk_=") != std::string::npos) {
+        rtk = cookie.substr(cookie.find("rtk_=") + 5,
+            cookie.find(";") > cookie.find("rtk_=") + 5
+            ? cookie.find(";") - 5 : cookie.length() - (cookie.find("rtk_=") + 5)
+        );
+    }
 
     std::time_t tt;
     std::stringstream ss;
     std::string stk_utc, rtk_utc;
+    long current_time = std::chrono::system_clock::now().time_since_epoch() / std::chrono::seconds(1);
+    std::string username = "";
     
-    if (stk.length() > 0)
+    // Check session token if we have it
+    if (stk.length() > 0 && rtk.length() > 0)
     {
         try {
+            // deconde refresh token
             const auto stk_decoded = jwt::decode(stk);
+
+            // getting token's fields
             for (const auto& elem : stk_decoded.get_payload_json()) {
-                // DEBUG
-                std::cout << elem.first << ": " << elem.second.to_str() << std::endl;
-                // DEBUG
+                // get session token expirency
                 if (elem.first == "exp") {
                     tt = std::atoi(elem.second.to_str().c_str());
                     ss << std::put_time(std::gmtime(&tt), "%a %b %d %H:%M:%S %Y");
                     stk_utc = ss.str();
 
-                    if (std::atoi(elem.second.to_str().c_str()) < std::chrono::system_clock::now().time_since_epoch() / std::chrono::seconds(1)) {
-                        return {};
+                    // If access token is not actual
+                    if (std::atoi(elem.second.to_str().c_str()) < current_time) {
+                        // first of all decode refresh token from base64
+                        const auto rtk_decoded = jwt::decode(rtk);
+
+                        // get refresh token expirency
+                        for (const auto& elem : rtk_decoded.get_payload_json()) {
+                            if (elem.first == "exp") {
+                                tt = std::atoi(elem.second.to_str().c_str());
+                                ss.str("");
+                                ss << std::put_time(std::gmtime(&tt), "%a %b %d %H:%M:%S %Y");
+                                rtk_utc = ss.str();
+
+                                // return unauthorized if rtk expired
+                                if (std::atoi(elem.second.to_str().c_str()) < current_time) {
+                                    return {};
+                                }
+
+                                // then verify refresh token
+                                const auto rtk_verifier = jwt::verify()
+                                    .allow_algorithm(jwt::algorithm::hs256{ Authentication::secretKeyRefresh })
+                                    .with_issuer(Authentication::issuer);
+                                rtk_verifier.verify(rtk_decoded);
+                            }
+                            // get username from refresh token if rtk was verified
+                            if (elem.first == "username") {
+                                std::string tempStr = elem.second.to_str();
+                                size_t start = tempStr.find("\"username\":") + 12;
+                                size_t subStrSize = tempStr.find("\",\"roles\":") - start;
+                                username = tempStr.substr(start, subStrSize);
+                            }
+                        }
+                        // Get new tokens pair if old rtk was successfully verified
+                        // Make sure we got username to put it in new tokens
+                        if (username.length() > 0) {
+                            return Authentication::getToken(username);
+                        }
+                        // Unauthorized if there was no username
+                        else { return {}; }
                     }
                 }
             }
 
-            // Verify session token
+            // Verify session token if it's not expired
+            // If expired - we got new tokens pair in code above
             const auto stk_verifier = jwt::verify()
                 .allow_algorithm(jwt::algorithm::hs256{ Authentication::secretKeySession })
                 .with_issuer(Authentication::issuer);
             stk_verifier.verify(stk_decoded);
 
-            // Refresh token
+            // Getting refresh token expirency to return both current tokens back
             const auto rtk_decoded = jwt::decode(rtk);
             for (const auto& elem : rtk_decoded.get_payload_json()) {
                 if (elem.first == "exp") {
@@ -61,33 +109,38 @@ ResponseInfo::tokensInfo Authentication::authUser(const std::string cookie) {
                     ss.str("");
                     ss << std::put_time(std::gmtime(&tt), "%a %b %d %H:%M:%S %Y");
                     rtk_utc = ss.str();
-
-                    if (std::atoi(elem.second.to_str().c_str()) < std::chrono::system_clock::now().time_since_epoch() / std::chrono::seconds(1)) {
-                        return {};
-                    }
                 }
             }
-            // Verify refresh token
-            const auto rtk_verifier = jwt::verify()
-                .allow_algorithm(jwt::algorithm::hs256{ Authentication::secretKeyRefresh })
-                .with_issuer(Authentication::issuer);
-
-            rtk_verifier.verify(rtk_decoded);
         }
+        // Any token is wrong (not verified)
         catch(...) { return {}; }
 
-        return {stk, stk_utc, rtk, rtk_utc};
+        // Return both tokens with expirency time in utc format
+        return {"stk_=" + stk, stk_utc, "rtk_=" + rtk, rtk_utc};
     }
+    // Check refresh token if we haven't session token
     else if (rtk.length() > 0) {
+        std::string username;
+
         try {
+            // decode refresh token
             const auto rtk_decoded = jwt::decode(rtk);
+
+            // getting token's fields
             for (const auto& elem : rtk_decoded.get_payload_json()) {
+                if (elem.first == "username") {
+                    std::string tempStr = elem.second.to_str();
+                    size_t start = tempStr.find("\"username\":") + 12;
+                    size_t subStrSize = tempStr.find("\",\"roles\":") - start;
+                    username = tempStr.substr(start, subStrSize);
+                }
                 if (elem.first == "exp") {
-                    if (std::atoi(elem.second.to_str().c_str()) < std::chrono::system_clock::now().time_since_epoch() / std::chrono::seconds(1)) {
+                    if (std::atoi(elem.second.to_str().c_str()) < current_time) {
                         return {};
                     }
                 }
             }
+
             // Verify refresh token
             const auto verifier = jwt::verify()
                 .allow_algorithm(jwt::algorithm::hs256{ Authentication::secretKeyRefresh })
@@ -95,11 +148,18 @@ ResponseInfo::tokensInfo Authentication::authUser(const std::string cookie) {
 
             verifier.verify(rtk_decoded);
         }
+        // Token is wrong (not verified)
         catch(...) { return {}; }
 
-        return {};
+        // Get new tokens pair if we verified refresh token
+        // and got username from token's fields
+        if (username.length() > 0) {
+            return Authentication::getToken(username);
+        }
+        else { return {}; }
     }
 
+    // Return unauthorized by default
     return {};
 }
 
