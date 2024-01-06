@@ -1,11 +1,15 @@
 {
     "cmake.configureSettings": {
         // Windows
-        "Boost_DEBUG": false,
-        "Boost_USE_STATIC_LIBS": true,
-        "BOOST_LIBRARYDIR": "D:/SDKs/boost_1_82_0/bin.v2/libs",
-        "OPENSSL_INCLUDE_DIR": "D:/OpenSSL/Static/x64/Release/include",
-        "nlohmann_json_DIR": "D:/SDKs/json-develop/build"
+        // "Boost_DEBUG": false,
+        // "Boost_USE_STATIC_LIBS": true,
+        // "BOOST_LIBRARYDIR": "D:/SDKs/boost_1_82_0/bin.v2/libs",
+        // "OPENSSL_INCLUDE_DIR": "D:/OpenSSL/Static/x64/Release/include",
+        // "nlohmann_json_DIR": "D:/SDKs/json-develop/build",
+        // Linux
+        "jwt-cpp_DIR": "/home/bergemon/Документы/SDKs/jwt-cpp/build/",
+        "libpqxx_DIR": "/home/bergemon/Документы/SDKs/libpqxx/build/"
+
     },
     "files.associations": {
         "algorithm": "cpp",
